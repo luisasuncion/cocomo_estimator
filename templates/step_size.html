@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="content-card">
+    <div class="section-title">
+        <i class="bi bi-rulers"></i>
+        <div>
+            <h1>Tamano del proyecto</h1>
+            <p>Registra el nombre del proyecto y el tamano estimado directamente en KSLOC.</p>
+        </div>
+    </div>
+
+    <form method="post" novalidate>
+        <div class="row g-3">
+            <div class="col-md-7">
+                <label class="form-label" for="project_name">Nombre del proyecto</label>
+                <input class="form-control" id="project_name" name="project_name" value="{{ data.project_name }}" placeholder="Sistema de gestion academica">
+            </div>
+            <div class="col-md-5">
+                <label class="form-label" for="ksloc">KSLOC</label>
+                <input class="form-control" id="ksloc" name="ksloc" inputmode="decimal" value="{{ data.ksloc or '' }}" placeholder="8.904" required>
+                <div class="form-text">Debe ser numerico, mayor que cero y puede incluir decimales.</div>
+            </div>
+        </div>
+
+        <div class="wizard-actions">
+            <a class="btn btn-outline-secondary" href="{{ url_for('wizard.index') }}">
+                <i class="bi bi-arrow-left me-1"></i>Atras
+            </a>
+            <button class="btn btn-primary" type="submit">
+                Siguiente<i class="bi bi-arrow-right ms-1"></i>
+            </button>
+        </div>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="content-card">
+    <div class="section-title">
+        <i class="bi bi-clipboard-data"></i>
+        <div>
+            <h1>Resumen de la estimacion</h1>
+            <p>Revisa los datos almacenados temporalmente en la sesion del usuario.</p>
+        </div>
+    </div>
+
+    <div class="summary-head">
+        <div>
+            <span>Proyecto</span>
+            <strong>{{ data.project_name or "Sin nombre" }}</strong>
+        </div>
+        <div>
+            <span>KSLOC</span>
+            <strong>{{ data.ksloc }}</strong>
+        </div>
+    </div>
+
+    <h2 class="table-title">Factores de escala</h2>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Codigo</th><th>Factor</th><th>Calificacion</th><th>Valor</th></tr></thead>
+            <tbody>
+                {% for code, item in data.scale_factors.items() %}
+                    <tr>
+                        <td><span class="factor-code">{{ code }}</span></td>
+                        <td>{{ factor_info[code][0] }}</td>
+                        <td>{{ item.rating }} - {{ rating_labels[item.rating] }}</td>
+                        <td>{{ "%.2f"|format(item.value) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="table-title">Multiplicadores de esfuerzo</h2>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Categoria</th><th>Codigo</th><th>Multiplicador</th><th>Calificacion</th><th>Valor</th></tr></thead>
+            <tbody>
+                {% for category, codes in {
+                    "Producto": ["RELY", "DATA", "CPLX", "RUSE", "DOCU"],
+                    "Plataforma": ["TIME", "STOR", "PVOL"],
+                    "Personal": ["ACAP", "PCAP", "PCON", "AEXP", "PEXP", "LTEX"],
+                    "Proyecto": ["TOOL", "SITE", "SCED"]
+                }.items() %}
+                    {% for code in codes %}
+                        {% set item = data.effort_multipliers[code] %}
+                        <tr>
+                            <td>{{ category }}</td>
+                            <td><span class="factor-code">{{ code }}</span></td>
+                            <td>{{ factor_info[code][0] }}</td>
+                            <td>{{ item.rating }} - {{ rating_labels[item.rating] }}</td>
+                            <td>{{ "%.2f"|format(item.value) }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="wizard-actions">
+        <a class="btn btn-outline-secondary" href="{{ url_for('wizard.project') }}">
+            <i class="bi bi-pencil-square me-1"></i>Volver y editar
+        </a>
+        <form method="post" action="{{ url_for('wizard.reset') }}" class="d-inline">
+            <button class="btn btn-outline-danger" type="submit">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar
+            </button>
+        </form>
+        <form method="post" action="{{ url_for('wizard.calculate') }}">
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-calculator me-2"></i>
+                Calcular estimacion
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}

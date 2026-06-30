@@ -1,0 +1,21 @@
+{% macro rating_select(code, options, saved_group, factor_info, rating_labels) %}
+    {% set selected = saved_group.get(code, {}).get('rating', 'NM' if 'NM' in options else options.keys()|list|first) %}
+    <article class="factor-card">
+        <div class="factor-heading">
+            <div>
+                <span class="factor-code">{{ code }}</span>
+                <h2>{{ factor_info[code][0] }}</h2>
+            </div>
+            <span class="value-pill" data-value-target="{{ code }}">{{ "%.2f"|format(options[selected]) }}</span>
+        </div>
+        <p>{{ factor_info[code][1] }}</p>
+        <label class="form-label" for="{{ code }}">Calificacion</label>
+        <select class="form-select rating-select" id="{{ code }}" name="{{ code }}" data-target="{{ code }}">
+            {% for rating, value in options.items() %}
+                <option value="{{ rating }}" data-value="{{ '%.2f'|format(value) }}" {{ 'selected' if rating == selected else '' }}>
+                    {{ rating }} - {{ rating_labels[rating] }}
+                </option>
+            {% endfor %}
+        </select>
+    </article>
+{% endmacro %}

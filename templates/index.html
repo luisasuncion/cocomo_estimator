@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-copy">
+        <span class="eyebrow"><i class="bi bi-diagram-3"></i> Modelo COCOMO II</span>
+        <h1>Estimador COCOMO II</h1>
+        <p>
+            Esta aplicacion permite registrar el tamano y las caracteristicas de un proyecto de software
+            utilizando los parametros estandarizados de COCOMO II.
+        </p>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('wizard.size') }}">
+            <i class="bi bi-play-circle me-2"></i>Iniciar estimacion
+        </a>
+    </div>
+    <div class="hero-panel" aria-hidden="true">
+        <i class="bi bi-braces-asterisk"></i>
+        <div>
+            <strong>KSLOC</strong>
+            <span>Factores de escala</span>
+            <span>Multiplicadores de esfuerzo</span>
+        </div>
+    </div>
+</section>
+{% endblock %}

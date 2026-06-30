@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="content-card">
+    <div class="section-title">
+        <i class="bi bi-calculator"></i>
+        <div>
+            <h1>Resultado de la estimacion</h1>
+            <p>Esfuerzo calculado con el modelo COCOMO II Post-Arquitectura.</p>
+        </div>
+    </div>
+
+    <div class="result-hero">
+        <span>Esfuerzo estimado</span>
+        <strong>{{ "%.2f"|format(result.effort_pm) }} personas-mes</strong>
+    </div>
+
+    <div class="result-grid">
+        <div class="result-metric">
+            <span>Tamano del proyecto</span>
+            <strong>{{ result.ksloc }} KSLOC</strong>
+        </div>
+        <div class="result-metric">
+            <span>Suma de factores de escala</span>
+            <strong>{{ "%.2f"|format(result.scale_sum) }}</strong>
+        </div>
+        <div class="result-metric">
+            <span>Exponente E</span>
+            <strong>{{ "%.4f"|format(result.exponent_e) }}</strong>
+        </div>
+        <div class="result-metric">
+            <span>Factor EAF</span>
+            <strong>{{ "%.4f"|format(result.eaf) }}</strong>
+        </div>
+        <div class="result-metric">
+            <span>Constante A</span>
+            <strong>{{ "%.2f"|format(result.constant_a) }}</strong>
+        </div>
+    </div>
+
+    <div class="formula-box">
+        <p>
+            PM = {{ "%.2f"|format(result.constant_a) }}
+            &times; ({{ result.ksloc }})^{{ "%.4f"|format(result.exponent_e) }}
+            &times; {{ "%.4f"|format(result.eaf) }}
+        </p>
+        <strong>PM = {{ "%.2f"|format(result.effort_pm) }} personas-mes</strong>
+    </div>
+
+    <div class="result-note">
+        <p>
+            Este resultado representa el esfuerzo total estimado. Por ejemplo,
+            {{ "%.2f"|format(result.effort_pm) }} personas-mes equivale al trabajo que una persona
+            realizaria aproximadamente durante {{ "%.2f"|format(result.effort_pm) }} meses, aunque
+            en la practica el esfuerzo puede distribuirse entre varios integrantes del equipo.
+        </p>
+    </div>
+
+    <div class="wizard-actions">
+        <a class="btn btn-outline-secondary" href="{{ url_for('wizard.summary') }}">
+            <i class="bi bi-arrow-left me-1"></i>Volver al resumen
+        </a>
+        <form method="post" action="{{ url_for('wizard.reset') }}">
+            <button class="btn btn-outline-danger" type="submit">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Nueva estimacion
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}

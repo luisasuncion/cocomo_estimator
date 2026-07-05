@@ -80,7 +80,7 @@ body {
 
 .wizard-progress {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(9, 1fr);
     gap: .5rem;
 }
 
@@ -256,6 +256,12 @@ body {
     font-weight: 800;
 }
 
+.table-subtitle {
+    margin: 1rem 0 .75rem;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
 .calc-placeholder {
     display: grid;
     justify-items: start;
@@ -290,6 +296,13 @@ body {
     gap: 1rem;
 }
 
+.final-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
 .result-metric {
     border: 1px solid var(--line);
     border-radius: 8px;
@@ -301,6 +314,18 @@ body {
     display: block;
     margin-top: .35rem;
     font-size: 1.35rem;
+}
+
+.result-metric small {
+    display: block;
+    margin-top: .45rem;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.result-metric-highlight {
+    border-color: rgba(36, 87, 214, 0.24);
+    background: linear-gradient(135deg, rgba(36, 87, 214, 0.06), #fff);
 }
 
 .formula-box,
@@ -315,9 +340,22 @@ body {
     background: #f8fbff;
 }
 
+.formula-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
 .formula-box p,
 .result-note p {
     margin: 0;
+}
+
+.formula-box h3,
+.chart-panel h3 {
+    margin: 0 0 .65rem;
+    font-size: 1rem;
+    font-weight: 800;
 }
 
 .formula-box strong {
@@ -331,6 +369,22 @@ body {
     margin-top: 1rem;
     color: var(--muted);
     background: rgba(36, 87, 214, 0.05);
+}
+
+.economic-form {
+    margin-top: 1.25rem;
+}
+
+.chart-panel {
+    height: 320px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    padding: 1rem;
+}
+
+.chart-panel canvas {
+    min-height: 250px;
 }
 
 @media (max-width: 768px) {

@@ -1,11 +1,18 @@
 import pytest
 
 from cocomo.services import (
+    calculate_average_staff,
+    calculate_cocomo_final,
     calculate_cocomo_effort,
     calculate_eaf,
     calculate_effort_pm,
     calculate_exponent_e,
     calculate_scale_sum,
+    calculate_salary_sensitivity,
+    calculate_schedule_exponent,
+    calculate_size_sensitivity,
+    calculate_tdev,
+    calculate_total_cost,
 )
 
 
@@ -107,3 +114,92 @@ def test_calculate_cocomo_effort_with_example_values():
     assert result["exponent_e"] == pytest.approx(1.0829)
     assert result["eaf"] == pytest.approx(1.0929, rel=1e-4)
     assert result["effort_pm"] == pytest.approx(34.2966, rel=1e-4)
+
+
+def test_calculate_schedule_exponent():
+    assert calculate_schedule_exponent(1.0829) == pytest.approx(0.31458)
+
+
+def test_calculate_tdev():
+    tdev = calculate_tdev(34.29663562044247, 0.31458)
+    assert tdev == pytest.approx(11.1590, rel=1e-4)
+
+
+def test_calculate_tdev_rejects_zero_pm():
+    with pytest.raises(ValueError, match="PM"):
+        calculate_tdev(0, 0.31458)
+
+
+def test_calculate_average_staff():
+    assert calculate_average_staff(34.29663562044247, 11.159005386429609) == pytest.approx(3.0734, rel=1e-4)
+
+
+def test_calculate_total_cost():
+    assert calculate_total_cost(34.29663562044247, 2500.0) == pytest.approx(85741.5891, rel=1e-4)
+
+
+def test_calculate_total_cost_rejects_zero_salary():
+    with pytest.raises(ValueError, match="salario"):
+        calculate_total_cost(34.29663562044247, 0)
+
+
+def test_calculate_total_cost_rejects_negative_salary():
+    with pytest.raises(ValueError, match="salario"):
+        calculate_total_cost(34.29663562044247, -2500)
+
+
+def test_size_sensitivity_optimistic():
+    scenarios = calculate_size_sensitivity(8.904, 1.0829, 1.0929453044536028, 2500.0)
+
+    assert scenarios[0]["name"] == "Optimista"
+    assert scenarios[0]["ksloc"] == pytest.approx(8.0136)
+    assert scenarios[0]["effort_pm"] == pytest.approx(30.5985, rel=1e-4)
+
+
+def test_size_sensitivity_base():
+    scenarios = calculate_size_sensitivity(8.904, 1.0829, 1.0929453044536028, 2500.0)
+
+    assert scenarios[1]["name"] == "Base"
+    assert scenarios[1]["ksloc"] == pytest.approx(8.904)
+    assert scenarios[1]["total_cost"] == pytest.approx(85741.5891, rel=1e-4)
+
+
+def test_size_sensitivity_pessimistic():
+    scenarios = calculate_size_sensitivity(8.904, 1.0829, 1.0929453044536028, 2500.0)
+
+    assert scenarios[2]["name"] == "Pesimista"
+    assert scenarios[2]["ksloc"] == pytest.approx(9.7944)
+    assert scenarios[2]["effort_pm"] == pytest.approx(38.0256, rel=1e-4)
+
+
+def test_salary_sensitivity_low_salary():
+    scenarios = calculate_salary_sensitivity(34.29663562044247, 2500.0)
+
+    assert scenarios[0]["name"] == "Bajo"
+    assert scenarios[0]["average_monthly_salary"] == pytest.approx(2250.0)
+    assert scenarios[0]["total_cost"] == pytest.approx(77167.4301, rel=1e-4)
+
+
+def test_salary_sensitivity_high_salary():
+    scenarios = calculate_salary_sensitivity(34.29663562044247, 2500.0)
+
+    assert scenarios[2]["name"] == "Alto"
+    assert scenarios[2]["average_monthly_salary"] == pytest.approx(2750.0)
+    assert scenarios[2]["total_cost"] == pytest.approx(94315.7480, rel=1e-4)
+
+
+def test_calculate_cocomo_final_with_example_values():
+    data = example_cocomo_data()
+    data["average_monthly_salary"] = 2500.0
+    data["currency"] = "PEN"
+
+    result = calculate_cocomo_final(data)
+
+    assert result["effort_pm"] == pytest.approx(34.2966, rel=1e-4)
+    assert result["schedule_exponent_f"] == pytest.approx(0.31458)
+    assert result["tdev_months"] == pytest.approx(11.1590, rel=1e-4)
+    assert result["average_staff"] == pytest.approx(3.0734, rel=1e-4)
+    assert result["rounded_staff"] == 4
+    assert result["total_cost"] == pytest.approx(85741.5891, rel=1e-4)
+    assert len(result["size_sensitivity"]) == 3
+    assert len(result["salary_sensitivity"]) == 3

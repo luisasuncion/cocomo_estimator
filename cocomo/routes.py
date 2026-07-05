@@ -1,8 +1,11 @@
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 
 from .services import (
+    DEFAULT_CURRENCY,
+    calculate_cocomo_final,
     calculate_cocomo_effort,
     get_data,
+    save_economic_data,
     save_effort_group,
     save_project_size,
     save_scale_factors,
@@ -16,7 +19,7 @@ from .tables import (
     RATING_LABELS,
     SCALE_FACTORS,
 )
-from .validators import validate_ksloc, validate_ratings
+from .validators import validate_currency, validate_ksloc, validate_ratings, validate_salary
 
 bp = Blueprint("wizard", __name__)
 
@@ -28,7 +31,8 @@ STEPS = [
     ("personnel", "Personal"),
     ("project", "Proyecto"),
     ("summary", "Resumen"),
-    ("results", "Resultado"),
+    ("economics", "Costos"),
+    ("results", "Resultados"),
 ]
 
 
@@ -146,6 +150,70 @@ def calculate():
     session["cocomo_result"] = result
     session.modified = True
 
+    return redirect(url_for("wizard.economics"))
+
+
+@bp.route("/costos", methods=["GET", "POST"])
+def economics():
+    result = session.get("cocomo_result")
+
+    if not result or "effort_pm" not in result:
+        flash("Primero debe calcular el esfuerzo de la estimacion.", "warning")
+        return redirect(url_for("wizard.summary"))
+
+    data = get_data()
+
+    if request.method == "POST":
+        salary, salary_error = validate_salary(request.form.get("average_monthly_salary"))
+        currency, currency_error = validate_currency(request.form.get("currency", DEFAULT_CURRENCY))
+        errors = [error for error in (salary_error, currency_error) if error]
+
+        if errors:
+            return render_template(
+                "economics.html",
+                active_step="economics",
+                active_index=[key for key, _label in STEPS].index("economics"),
+                data=data,
+                errors=errors,
+                result=result,
+                steps=STEPS,
+            )
+
+        save_economic_data(salary, currency)
+
+        try:
+            final_result = calculate_cocomo_final(session["cocomo_data"])
+        except (KeyError, TypeError, ValueError) as exc:
+            flash(str(exc), "danger")
+            return redirect(url_for("wizard.economics"))
+
+        session["cocomo_result"] = final_result
+        session.modified = True
+
+        return redirect(url_for("wizard.results"))
+
+    return render_template(
+        "economics.html",
+        active_step="economics",
+        active_index=[key for key, _label in STEPS].index("economics"),
+        data=data,
+        result=result,
+        steps=STEPS,
+    )
+
+
+@bp.get("/analisis-sensibilidad")
+def sensitivity():
+    result = session.get("cocomo_result")
+
+    if not result:
+        flash("Primero debe realizar el calculo de la estimacion.", "warning")
+        return redirect(url_for("wizard.summary"))
+
+    if "size_sensitivity" not in result:
+        flash("Primero debe completar los datos economicos.", "warning")
+        return redirect(url_for("wizard.economics"))
+
     return redirect(url_for("wizard.results"))
 
 
@@ -156,6 +224,10 @@ def results():
     if not result:
         flash("Primero debe realizar el calculo de la estimacion.", "warning")
         return redirect(url_for("wizard.summary"))
+
+    if "total_cost" not in result:
+        flash("Primero debe completar los datos economicos.", "warning")
+        return redirect(url_for("wizard.economics"))
 
     return render_template(
         "results.html",

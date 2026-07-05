@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="content-card">
+    <div class="section-title">
+        <i class="bi bi-cash-coin"></i>
+        <div>
+            <h1>Datos economicos</h1>
+            <p>Ingresa el salario mensual promedio para calcular costo, tiempo nominal y personal.</p>
+        </div>
+    </div>
+
+    <div class="result-hero">
+        <span>Esfuerzo previamente calculado</span>
+        <strong>{{ "%.2f"|format(result.effort_pm) }} personas-mes</strong>
+    </div>
+
+    <div class="result-note">
+        <p>
+            El costo laboral se calcula multiplicando el esfuerzo en personas-mes por el salario
+            mensual promedio de cada integrante. El salario se interpreta como costo mensual por persona.
+        </p>
+    </div>
+
+    <form method="post" class="economic-form">
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label fw-semibold" for="average_monthly_salary">
+                    Salario mensual promedio por integrante
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text">S/</span>
+                    <input
+                        class="form-control"
+                        id="average_monthly_salary"
+                        name="average_monthly_salary"
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        required
+                        value="{{ data.average_monthly_salary or '' }}"
+                        placeholder="2500.00"
+                    >
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold" for="currency">Moneda</label>
+                <select class="form-select" id="currency" name="currency">
+                    <option value="PEN" selected>PEN - Soles peruanos</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="wizard-actions">
+            <a class="btn btn-outline-secondary" href="{{ url_for('wizard.summary') }}">
+                <i class="bi bi-arrow-left me-1"></i>Volver al resumen
+            </a>
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-calculator me-2"></i>
+                Calcular resultados finales
+            </button>
+        </div>
+    </form>
+</section>
+{% endblock %}

@@ -13,6 +13,31 @@ def validate_ksloc(value):
     return ksloc, None
 
 
+def validate_salary(value):
+    if value is None or str(value).strip() == "":
+        return None, "El salario mensual promedio es obligatorio."
+
+    try:
+        salary = float(str(value).replace(",", "."))
+    except ValueError:
+        return None, "El salario mensual promedio debe ser numerico."
+
+    if salary <= 0:
+        return None, "El salario mensual promedio debe ser mayor que cero."
+
+    return salary, None
+
+
+def validate_currency(value):
+    allowed_currencies = {"PEN"}
+    currency = (value or "PEN").strip().upper()
+
+    if currency not in allowed_currencies:
+        return None, "Seleccione una moneda valida."
+
+    return currency, None
+
+
 def validate_ratings(form, table):
     errors = []
     selected = {}

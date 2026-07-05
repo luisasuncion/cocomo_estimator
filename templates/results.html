@@ -3,62 +3,170 @@
 {% block content %}
 <section class="content-card">
     <div class="section-title">
-        <i class="bi bi-calculator"></i>
+        <i class="bi bi-graph-up-arrow"></i>
         <div>
-            <h1>Resultado de la estimacion</h1>
-            <p>Esfuerzo calculado con el modelo COCOMO II Post-Arquitectura.</p>
+            <h1>Estimacion final del proyecto</h1>
+            <p>Resultados de esfuerzo, tiempo nominal, personal promedio, costo laboral y sensibilidad.</p>
         </div>
     </div>
 
-    <div class="result-hero">
-        <span>Esfuerzo estimado</span>
-        <strong>{{ "%.2f"|format(result.effort_pm) }} personas-mes</strong>
-    </div>
-
-    <div class="result-grid">
-        <div class="result-metric">
-            <span>Tamano del proyecto</span>
-            <strong>{{ result.ksloc }} KSLOC</strong>
+    <div class="final-grid">
+        <div class="result-metric result-metric-highlight">
+            <span>Esfuerzo</span>
+            <strong>{{ "%.2f"|format(result.effort_pm) }} personas-mes</strong>
         </div>
-        <div class="result-metric">
-            <span>Suma de factores de escala</span>
-            <strong>{{ "%.2f"|format(result.scale_sum) }}</strong>
+        <div class="result-metric result-metric-highlight">
+            <span>Tiempo nominal</span>
+            <strong>{{ "%.2f"|format(result.tdev_months) }} meses</strong>
         </div>
-        <div class="result-metric">
-            <span>Exponente E</span>
-            <strong>{{ "%.4f"|format(result.exponent_e) }}</strong>
+        <div class="result-metric result-metric-highlight">
+            <span>Personal promedio</span>
+            <strong>{{ "%.2f"|format(result.average_staff) }} personas</strong>
+            <small>Equipo practico recomendado: {{ result.rounded_staff }} personas</small>
         </div>
-        <div class="result-metric">
-            <span>Factor EAF</span>
-            <strong>{{ "%.4f"|format(result.eaf) }}</strong>
+        <div class="result-metric result-metric-highlight">
+            <span>Costo total</span>
+            <strong>S/ {{ result.total_cost|currency_amount }}</strong>
         </div>
-        <div class="result-metric">
-            <span>Constante A</span>
-            <strong>{{ "%.2f"|format(result.constant_a) }}</strong>
-        </div>
-    </div>
-
-    <div class="formula-box">
-        <p>
-            PM = {{ "%.2f"|format(result.constant_a) }}
-            &times; ({{ result.ksloc }})^{{ "%.4f"|format(result.exponent_e) }}
-            &times; {{ "%.4f"|format(result.eaf) }}
-        </p>
-        <strong>PM = {{ "%.2f"|format(result.effort_pm) }} personas-mes</strong>
     </div>
 
     <div class="result-note">
         <p>
-            Este resultado representa el esfuerzo total estimado. Por ejemplo,
-            {{ "%.2f"|format(result.effort_pm) }} personas-mes equivale al trabajo que una persona
-            realizaria aproximadamente durante {{ "%.2f"|format(result.effort_pm) }} meses, aunque
-            en la practica el esfuerzo puede distribuirse entre varios integrantes del equipo.
+            El costo calculado considera unicamente el esfuerzo del personal. No incluye infraestructura,
+            licencias, servicios en la nube, capacitacion, mantenimiento ni otros costos indirectos.
         </p>
+    </div>
+
+    <h2 class="table-title">Detalle del calculo</h2>
+    <div class="formula-grid">
+        <div class="formula-box">
+            <h3>Esfuerzo</h3>
+            <p>PM = 2.94 &times; (KSLOC)^E &times; EAF</p>
+            <p>
+                PM = {{ "%.2f"|format(result.constant_a) }}
+                &times; ({{ result.ksloc }})^{{ "%.4f"|format(result.exponent_e) }}
+                &times; {{ "%.4f"|format(result.eaf) }}
+            </p>
+            <strong>PM = {{ "%.2f"|format(result.effort_pm) }} personas-mes</strong>
+        </div>
+
+        <div class="formula-box">
+            <h3>Exponente de tiempo</h3>
+            <p>F = 0.28 + 0.2 &times; (E - 0.91)</p>
+            <p>
+                F = {{ "%.2f"|format(result.constant_d) }}
+                + 0.2 &times; ({{ "%.4f"|format(result.exponent_e) }}
+                - {{ "%.2f"|format(result.constant_b) }})
+            </p>
+            <strong>F = {{ "%.4f"|format(result.schedule_exponent_f) }}</strong>
+        </div>
+
+        <div class="formula-box">
+            <h3>Tiempo nominal</h3>
+            <p>TDEV = 3.67 &times; PM^F</p>
+            <p>
+                TDEV = {{ "%.2f"|format(result.constant_c) }}
+                &times; ({{ "%.4f"|format(result.effort_pm) }})^{{ "%.4f"|format(result.schedule_exponent_f) }}
+            </p>
+            <strong>TDEV = {{ "%.2f"|format(result.tdev_months) }} meses</strong>
+        </div>
+
+        <div class="formula-box">
+            <h3>Personal promedio</h3>
+            <p>Personal = PM / TDEV</p>
+            <p>
+                Personal = {{ "%.4f"|format(result.effort_pm) }}
+                / {{ "%.2f"|format(result.tdev_months) }}
+            </p>
+            <strong>Personal = {{ "%.2f"|format(result.average_staff) }} personas</strong>
+        </div>
+
+        <div class="formula-box">
+            <h3>Costo total</h3>
+            <p>Costo = PM &times; salario mensual promedio</p>
+            <p>
+                Costo = {{ "%.4f"|format(result.effort_pm) }}
+                &times; {{ "%.2f"|format(result.average_monthly_salary) }}
+            </p>
+            <strong>Costo = S/ {{ result.total_cost|currency_amount }}</strong>
+        </div>
+    </div>
+
+    <h2 class="table-title" id="sensibilidad">Analisis de sensibilidad</h2>
+    <div class="row g-3 mb-3">
+        <div class="col-lg-6">
+            <div class="chart-panel">
+                <h3>Costo total por escenario de tamano</h3>
+                <canvas id="sizeCostChart"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-panel">
+                <h3>Esfuerzo PM por escenario de tamano</h3>
+                <canvas id="sizeEffortChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="table-subtitle">Sensibilidad por tamano</h3>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Escenario</th>
+                    <th class="text-end">KSLOC</th>
+                    <th class="text-end">PM</th>
+                    <th class="text-end">TDEV</th>
+                    <th class="text-end">Personal</th>
+                    <th class="text-end">Costo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in result.size_sensitivity %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td class="text-end">{{ "%.3f"|format(item.ksloc) }}</td>
+                        <td class="text-end">{{ "%.2f"|format(item.effort_pm) }}</td>
+                        <td class="text-end">{{ "%.2f"|format(item.tdev_months) }}</td>
+                        <td class="text-end">{{ "%.2f"|format(item.average_staff) }}</td>
+                        <td class="text-end">S/ {{ item.total_cost|currency_amount }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="table-subtitle">Sensibilidad salarial</h3>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Escenario salarial</th>
+                    <th class="text-end">Salario mensual</th>
+                    <th class="text-end">Costo total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in result.salary_sensitivity %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td class="text-end">S/ {{ item.average_monthly_salary|currency_amount }}</td>
+                        <td class="text-end">S/ {{ item.total_cost|currency_amount }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
     <div class="wizard-actions">
         <a class="btn btn-outline-secondary" href="{{ url_for('wizard.summary') }}">
             <i class="bi bi-arrow-left me-1"></i>Volver al resumen
+        </a>
+        <a class="btn btn-outline-primary" href="{{ url_for('wizard.economics') }}">
+            <i class="bi bi-cash-coin me-1"></i>Modificar salario
+        </a>
+        <a class="btn btn-primary" href="{{ url_for('wizard.results') }}#sensibilidad">
+            <i class="bi bi-bar-chart-line me-1"></i>Ver analisis de sensibilidad
         </a>
         <form method="post" action="{{ url_for('wizard.reset') }}">
             <button class="btn btn-outline-danger" type="submit">
@@ -67,4 +175,53 @@
         </form>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+    const sizeSensitivity = {{ result.size_sensitivity | tojson }};
+    const labels = sizeSensitivity.map((item) => item.name);
+
+    new Chart(document.getElementById("sizeCostChart"), {
+        type: "bar",
+        data: {
+            labels,
+            datasets: [{
+                label: "Costo total",
+                data: sizeSensitivity.map((item) => item.total_cost),
+                backgroundColor: "rgba(36, 87, 214, 0.72)",
+                borderColor: "rgba(36, 87, 214, 1)",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    new Chart(document.getElementById("sizeEffortChart"), {
+        type: "line",
+        data: {
+            labels,
+            datasets: [{
+                label: "Personas-mes",
+                data: sizeSensitivity.map((item) => item.effort_pm),
+                borderColor: "rgba(15, 159, 143, 1)",
+                backgroundColor: "rgba(15, 159, 143, 0.16)",
+                fill: true,
+                tension: 0.25
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+</script>
 {% endblock %}

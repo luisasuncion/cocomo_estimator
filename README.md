@@ -1,6 +1,6 @@
 # Estimador COCOMO II
 
-Aplicacion web independiente para registrar datos del modelo COCOMO II mediante un asistente por pasos y calcular esfuerzo, tiempo nominal, personal promedio, costo laboral y analisis de sensibilidad. La Semana 13 agrega datos economicos y mantiene los calculos previos de E, EAF y PM.
+Aplicacion web independiente para registrar datos del modelo COCOMO II mediante un asistente por pasos, calcular esfuerzo, tiempo nominal, personal promedio, costo laboral, analisis de sensibilidad y exportar un reporte PDF con los resultados finales.
 
 ## Tecnologias utilizadas
 
@@ -9,6 +9,8 @@ Aplicacion web independiente para registrar datos del modelo COCOMO II mediante 
 - Bootstrap 5
 - HTML, CSS y JavaScript
 - pytest
+- WeasyPrint
+- ReportLab como alternativa si WeasyPrint no esta disponible
 
 ## Requisitos
 
@@ -56,6 +58,43 @@ http://127.0.0.1:5000
 ```bash
 pytest
 ```
+
+## Exportar reporte PDF
+
+Desde la pantalla de resultados finales aparece el boton:
+
+```text
+Exportar reporte PDF
+```
+
+La ruta utilizada es:
+
+```text
+/exportar-reporte
+```
+
+El reporte se genera en memoria con los datos ya validados y guardados en `session["cocomo_data"]` y `session["cocomo_result"]`. No se toman valores desde query string ni desde JavaScript, no se usan servicios externos y no se guarda ningun PDF permanentemente en el servidor.
+
+El archivo descargado usa un nombre sanitizado:
+
+```text
+reporte_cocomo_ii_nombre_del_proyecto_YYYY-MM-DD.pdf
+```
+
+El PDF incluye:
+
+- Portada con nombre del proyecto, fecha y aplicacion.
+- Datos generales del proyecto.
+- Factores de escala.
+- Multiplicadores de esfuerzo separados por categoria.
+- Resultados principales: PM, TDEV, personal, salario y costo.
+- Detalle de formulas.
+- Analisis de sensibilidad por tamano y salario.
+- Interpretacion dinamica y conclusion tecnica.
+
+La generacion principal usa WeasyPrint con la plantilla `templates/report_pdf.html` y los estilos `static/css/report.css`. Si el entorno no permite usar WeasyPrint correctamente, el backend usa ReportLab como alternativa.
+
+WeasyPrint puede requerir librerias del sistema operativo relacionadas con renderizado de fuentes y Cairo/Pango. En Linux, si la instalacion falla, revise la documentacion oficial de WeasyPrint para instalar dependencias nativas antes de ejecutar `pip install -r requirements.txt`.
 
 ## Formulas implementadas
 
@@ -147,6 +186,7 @@ cocomo_estimator/
 │   ├── __init__.py
 │   ├── tables.py
 │   ├── services.py
+│   ├── report_service.py
 │   ├── routes.py
 │   └── validators.py
 ├── templates/
@@ -159,16 +199,19 @@ cocomo_estimator/
 │   ├── step_personnel.html
 │   ├── step_project.html
 │   ├── economics.html
+│   ├── report_pdf.html
 │   ├── results.html
 │   ├── summary.html
 │   └── components/
 │       └── rating_select.html
 ├── static/
     ├── css/
+    │   ├── report.css
     │   └── styles.css
     └── js/
         └── wizard.js
 └── tests/
+    ├── test_report_export.py
     ├── test_routes.py
     └── test_services.py
 ```
@@ -185,6 +228,7 @@ cocomo_estimator/
 8. Resumen: muestra todas las selecciones y valores guardados en sesion.
 9. Datos economicos: muestra el esfuerzo PM y solicita salario mensual promedio y moneda.
 10. Resultados: muestra esfuerzo, TDEV, personal promedio, costo total, formulas sustituidas y sensibilidad.
+11. Exportacion PDF: descarga un reporte imprimible con los resultados finales.
 
 Cada vez que se pulsa Siguiente, el backend valida los datos, busca el valor numerico en las tablas COCOMO II y guarda la seleccion en `session["cocomo_data"]`. Al pulsar Calcular estimacion, se calcula el esfuerzo PM y se solicita el salario. Luego se guardan los resultados finales en `session["cocomo_result"]`.
 
@@ -192,4 +236,4 @@ La ruta de calculo usa POST. La pantalla de resultados no borra los datos; Volve
 
 ## Alcance actual
 
-Esta version calcula esfuerzo, tiempo nominal, personal promedio, costo laboral y sensibilidad. No agrega base de datos ni costos indirectos.
+Esta version calcula esfuerzo, tiempo nominal, personal promedio, costo laboral, sensibilidad y exporta reporte PDF. No agrega base de datos ni costos indirectos.

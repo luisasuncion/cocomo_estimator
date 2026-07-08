@@ -51,7 +51,7 @@ FACTOR_INFO = {
     "TEAM": ("Cohesion del equipo", "Sinergia, comunicacion y estabilidad del equipo de trabajo."),
     "PMAT": ("Madurez del proceso", "Nivel de definicion y mejora del proceso de software."),
     "RELY": ("Confiabilidad requerida", "Impacto de fallas y exigencia de funcionamiento correcto."),
-    "DATA": ("Tamano de base de datos", "Relacion entre volumen de datos y tamano del software."),
+    "DATA": ("Tamaño de base de datos", "Relacion entre volumen de datos y tamaño del software."),
     "CPLX": ("Complejidad del producto", "Complejidad de control, datos, operaciones e interfaces."),
     "RUSE": ("Reutilizacion requerida", "Nivel esperado de reutilizacion en otros proyectos o productos."),
     "DOCU": ("Documentacion", "Adecuacion de la documentacion a las necesidades del ciclo de vida."),

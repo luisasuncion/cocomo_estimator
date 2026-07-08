@@ -1,5 +1,8 @@
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+import os
 
+from flask import Blueprint, current_app, flash, make_response, redirect, render_template, request, session, url_for
+
+from .report_service import build_report_context, build_report_filename, html_to_pdf
 from .services import (
     DEFAULT_CURRENCY,
     calculate_cocomo_final,
@@ -236,6 +239,28 @@ def results():
         result=result,
         steps=STEPS,
     )
+
+
+@bp.get("/exportar-reporte")
+def export_report():
+    cocomo_data = session.get("cocomo_data")
+    cocomo_result = session.get("cocomo_result")
+
+    try:
+        report = build_report_context(cocomo_data, cocomo_result)
+    except ValueError:
+        flash("No existen resultados disponibles para generar el reporte.", "warning")
+        return redirect(url_for("wizard.summary"))
+
+    html_content = render_template("report_pdf.html", report=report)
+    css_path = os.path.join(current_app.root_path, "..", "static", "css", "report.css")
+    pdf_bytes = html_to_pdf(html_content, css_path, report)
+    filename = build_report_filename(report["project_name"], report["generated_at"])
+
+    response = make_response(pdf_bytes)
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
 
 
 @bp.post("/reiniciar")

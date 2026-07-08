@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Reporte de estimacion COCOMO II</title>
+</head>
+<body>
+    <section class="cover">
+        <h1>Reporte de estimacion COCOMO II</h1>
+        <h2>{{ report.project_name }}</h2>
+        <p>{{ report.generated_at.strftime("%Y-%m-%d %H:%M") }}</p>
+        <p>{{ report.app_name }}</p>
+        <p>Estimacion de esfuerzo, tiempo, personal y costo</p>
+    </section>
+
+    <section class="page-break">
+        <h2>1. Datos generales del proyecto</h2>
+        <table>
+            <tbody>
+                <tr><th>Campo</th><th>Valor</th></tr>
+                <tr><td>Nombre del proyecto</td><td>{{ report.project_name }}</td></tr>
+                <tr><td>Tamaño</td><td>{{ "%.3f"|format(report.result.ksloc) }} KSLOC</td></tr>
+                <tr><td>Moneda</td><td>{{ report.currency }}</td></tr>
+                <tr><td>Salario mensual promedio</td><td>S/ {{ report.result.average_monthly_salary|currency_amount }}</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>2. Factores de escala</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Factor</th>
+                    <th>Nombre</th>
+                    <th>Calificacion</th>
+                    <th class="number">Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in report.scale_factors %}
+                    <tr>
+                        <td>{{ item.code }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.rating_label }}</td>
+                        <td class="number">{{ "%.2f"|format(item.value) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p><strong>Suma de factores de escala:</strong> {{ "%.2f"|format(report.result.scale_sum) }}</p>
+        <p><strong>Exponente E:</strong> {{ "%.4f"|format(report.result.exponent_e) }}</p>
+    </section>
+
+    <section>
+        <h2>3. Multiplicadores de esfuerzo</h2>
+        {% for category in report.effort_categories %}
+            <h3>{{ category.name }}</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cost Driver</th>
+                        <th>Nombre</th>
+                        <th>Calificacion</th>
+                        <th class="number">Multiplicador</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in category.rows %}
+                        <tr>
+                            <td>{{ item.code }}</td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.rating_label }}</td>
+                            <td class="number">{{ "%.2f"|format(item.multiplier) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+        <p><strong>EAF:</strong> {{ "%.4f"|format(report.result.eaf) }}</p>
+    </section>
+
+    <section class="page-break">
+        <h2>4. Resultados principales</h2>
+        <table>
+            <thead>
+                <tr><th>Resultado</th><th class="number">Valor</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Esfuerzo estimado</td><td class="number">{{ "%.2f"|format(report.result.effort_pm) }} personas-mes</td></tr>
+                <tr><td>Tiempo nominal</td><td class="number">{{ "%.2f"|format(report.result.tdev_months) }} meses</td></tr>
+                <tr><td>Personal promedio</td><td class="number">{{ "%.2f"|format(report.result.average_staff) }} personas</td></tr>
+                <tr><td>Personal recomendado</td><td class="number">{{ report.result.rounded_staff }} personas</td></tr>
+                <tr><td>Salario promedio</td><td class="number">S/ {{ report.result.average_monthly_salary|currency_amount }}</td></tr>
+                <tr><td>Costo laboral total</td><td class="number">S/ {{ report.result.total_cost|currency_amount }}</td></tr>
+            </tbody>
+        </table>
+        <p class="note">
+            El costo estimado corresponde unicamente al costo laboral del equipo y no incluye infraestructura,
+            licencias, servicios en la nube, capacitacion, mantenimiento ni otros costos indirectos.
+        </p>
+    </section>
+
+    <section>
+        <h2>5. Detalle de formulas</h2>
+        {% for formula in report.formulas %}
+            <div class="formula">
+                <h3>{{ formula.title }}</h3>
+                {% for line in formula.lines %}
+                    <p>{{ line }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </section>
+
+    <section>
+        <h2>6. Analisis de sensibilidad</h2>
+        <h3>Escenarios de tamaño</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Escenario</th>
+                    <th class="number">KSLOC</th>
+                    <th class="number">PM</th>
+                    <th class="number">TDEV</th>
+                    <th class="number">Personal</th>
+                    <th class="number">Costo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in report.result.size_sensitivity %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td class="number">{{ "%.3f"|format(item.ksloc) }}</td>
+                        <td class="number">{{ "%.2f"|format(item.effort_pm) }}</td>
+                        <td class="number">{{ "%.2f"|format(item.tdev_months) }}</td>
+                        <td class="number">{{ "%.2f"|format(item.average_staff) }}</td>
+                        <td class="number">S/ {{ item.total_cost|currency_amount }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>Sensibilidad salarial</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Escenario</th>
+                    <th class="number">Salario mensual</th>
+                    <th class="number">Costo total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in report.result.salary_sensitivity %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td class="number">S/ {{ item.average_monthly_salary|currency_amount }}</td>
+                        <td class="number">S/ {{ item.total_cost|currency_amount }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>7. Interpretacion de resultados</h2>
+        <p>{{ report.interpretation }}</p>
+    </section>
+
+    <section>
+        <h2>8. Conclusion tecnica</h2>
+        <p>{{ report.conclusion }}</p>
+    </section>
+</body>
+</html>

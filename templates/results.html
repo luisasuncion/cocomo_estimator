@@ -96,19 +96,19 @@
     <div class="row g-3 mb-3">
         <div class="col-lg-6">
             <div class="chart-panel">
-                <h3>Costo total por escenario de tamano</h3>
+                <h3>Costo total por escenario de tamaño</h3>
                 <canvas id="sizeCostChart"></canvas>
             </div>
         </div>
         <div class="col-lg-6">
             <div class="chart-panel">
-                <h3>Esfuerzo PM por escenario de tamano</h3>
+                <h3>Esfuerzo PM por escenario de tamaño</h3>
                 <canvas id="sizeEffortChart"></canvas>
             </div>
         </div>
     </div>
 
-    <h3 class="table-subtitle">Sensibilidad por tamano</h3>
+    <h3 class="table-subtitle">Sensibilidad por tamaño</h3>
     <div class="table-responsive">
         <table class="table align-middle">
             <thead>
@@ -167,6 +167,10 @@
         </a>
         <a class="btn btn-primary" href="{{ url_for('wizard.results') }}#sensibilidad">
             <i class="bi bi-bar-chart-line me-1"></i>Ver analisis de sensibilidad
+        </a>
+        <a href="{{ url_for('wizard.export_report') }}" class="btn btn-danger">
+            <i class="bi bi-file-earmark-pdf me-2"></i>
+            Exportar reporte PDF
         </a>
         <form method="post" action="{{ url_for('wizard.reset') }}">
             <button class="btn btn-outline-danger" type="submit">

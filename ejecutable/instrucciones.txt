@@ -1,0 +1,49 @@
+INSTRUCCIONES DE EJECUCION
+Estimador COCOMO II
+
+1. Descomprimir el archivo ZIP del proyecto.
+2. Ingresar a la carpeta ejecutable.
+3. Hacer doble clic en iniciar_estimador.bat.
+4. Esperar a que se cree el entorno virtual y se instalen las dependencias.
+5. El sistema se abrira automaticamente en el navegador.
+6. Si no se abre automaticamente, ingresar manualmente a:
+   http://127.0.0.1:5000
+
+REQUISITOS
+
+- Tener instalado Python 3.
+- Python debe estar agregado al PATH del sistema.
+- Tener conexion a internet la primera vez que se ejecuta, para instalar dependencias.
+
+TECNOLOGIAS UTILIZADAS
+
+- Python 3
+- Flask
+- Bootstrap 5
+- HTML
+- CSS
+- JavaScript
+- Sesiones de Flask
+- Generacion de reportes PDF
+
+FUNCIONALIDADES DEL SISTEMA
+
+El estimador permite:
+
+- Ingresar el tamano del proyecto en KSLOC.
+- Registrar los cinco factores de escala de COCOMO II.
+- Registrar los 17 multiplicadores de esfuerzo.
+- Calcular el exponente E.
+- Calcular el EAF.
+- Calcular el esfuerzo en personas-mes.
+- Calcular el tiempo nominal de desarrollo.
+- Calcular el personal promedio requerido.
+- Calcular el costo laboral total.
+- Realizar analisis de sensibilidad.
+- Exportar un reporte PDF con los resultados.
+
+NOTA
+
+El sistema se ejecuta de forma local en el equipo del usuario.
+No requiere conexion a una base de datos externa.
+Para detener el servidor, cerrar la ventana de consola o presionar CTRL + C.

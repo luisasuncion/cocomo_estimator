@@ -53,10 +53,40 @@ La aplicacion queda disponible en:
 http://127.0.0.1:5000
 ```
 
-## Ejecutar pruebas
+## Ejecución mediante archivo BAT
 
-```bash
-pytest
+Para ejecutar en Windows, se incluye el archivo:
+
+```text
+ejecutable/iniciar_estimador.bat
+```
+
+Para ejecutarlo:
+
+1. Descomprima el archivo ZIP del proyecto.
+2. Ingrese a la carpeta `ejecutable`.
+3. Haga doble clic en `iniciar_estimador.bat`.
+4. Espere a que se cree el entorno virtual `venv` y se instalen las dependencias.
+5. El sistema se abrira automaticamente en el navegador.
+
+Requisitos previos:
+
+- Tener instalado Python 3.
+- Python debe estar agregado al PATH del sistema.
+- Tener conexion a internet la primera vez que se ejecuta, para instalar dependencias desde `requirements.txt`.
+
+Si Python no esta agregado al PATH, instale Python 3 desde:
+
+```text
+https://www.python.org/downloads/
+```
+
+Durante la instalacion en Windows, marque la opcion `Add Python to PATH`. Luego cierre la consola y vuelva a ejecutar `ejecutable/iniciar_estimador.bat`.
+
+La URL local del sistema es:
+
+```text
+http://127.0.0.1:5000
 ```
 
 ## Exportar reporte PDF
@@ -73,9 +103,7 @@ La ruta utilizada es:
 /exportar-reporte
 ```
 
-El reporte se genera en memoria con los datos ya validados y guardados en `session["cocomo_data"]` y `session["cocomo_result"]`. No se toman valores desde query string ni desde JavaScript, no se usan servicios externos y no se guarda ningun PDF permanentemente en el servidor.
-
-El archivo descargado usa un nombre sanitizado:
+El archivo descargado usa el nombre:
 
 ```text
 reporte_cocomo_ii_nombre_del_proyecto_YYYY-MM-DD.pdf
@@ -91,10 +119,6 @@ El PDF incluye:
 - Detalle de formulas.
 - Analisis de sensibilidad por tamano y salario.
 - Interpretacion dinamica y conclusion tecnica.
-
-La generacion principal usa WeasyPrint con la plantilla `templates/report_pdf.html` y los estilos `static/css/report.css`. Si el entorno no permite usar WeasyPrint correctamente, el backend usa ReportLab como alternativa.
-
-WeasyPrint puede requerir librerias del sistema operativo relacionadas con renderizado de fuentes y Cairo/Pango. En Linux, si la instalacion falla, revise la documentacion oficial de WeasyPrint para instalar dependencias nativas antes de ejecutar `pip install -r requirements.txt`.
 
 ## Formulas implementadas
 
@@ -182,6 +206,9 @@ cocomo_estimator/
 ├── config.py
 ├── requirements.txt
 ├── README.md
+├── ejecutable/
+│   ├── iniciar_estimador.bat
+│   └── instrucciones.txt
 ├── cocomo/
 │   ├── __init__.py
 │   ├── tables.py
@@ -229,11 +256,3 @@ cocomo_estimator/
 9. Datos economicos: muestra el esfuerzo PM y solicita salario mensual promedio y moneda.
 10. Resultados: muestra esfuerzo, TDEV, personal promedio, costo total, formulas sustituidas y sensibilidad.
 11. Exportacion PDF: descarga un reporte imprimible con los resultados finales.
-
-Cada vez que se pulsa Siguiente, el backend valida los datos, busca el valor numerico en las tablas COCOMO II y guarda la seleccion en `session["cocomo_data"]`. Al pulsar Calcular estimacion, se calcula el esfuerzo PM y se solicita el salario. Luego se guardan los resultados finales en `session["cocomo_result"]`.
-
-La ruta de calculo usa POST. La pantalla de resultados no borra los datos; Volver al resumen y Modificar salario conservan la estimacion, mientras Nueva estimacion limpia `session["cocomo_data"]` y `session["cocomo_result"]`.
-
-## Alcance actual
-
-Esta version calcula esfuerzo, tiempo nominal, personal promedio, costo laboral, sensibilidad y exporta reporte PDF. No agrega base de datos ni costos indirectos.
